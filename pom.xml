@@ -34,6 +34,15 @@
             <organization>Juniper Networks</organization>
             <organizationUrl>https://github.com/Juniper</organizationUrl>
         </developer>
+        <developer>
+            <name>Eric K. Sender</name>
+            <email>eric.sender@4tug.com</email>
+            <organization>Technology Unlimited Group</organization>
+            <organizationUrl>https://github.com/esend7881/netconf-java</organizationUrl>
+            <roles>
+                <role>minor</role>
+            </roles>
+        </developer>
     </developers>
 
     <scm>
@@ -42,8 +51,42 @@
         <url>https://github.com/Juniper/netconf-java/tree/master</url>
     </scm>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
