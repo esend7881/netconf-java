@@ -155,6 +155,7 @@ public class NetconfSession {
         // RFC conformance for XML type, namespaces and message ids for RPCs
         messageId++;
         rpc = rpc.replace("<rpc>", "<rpc" + getRpcAttributes() + " message-id=\"" + messageId + "\">").trim();
+        rpc = rpc.replace("<datastore>", "<datastore xmlns:ds=\"urn:ietf:params:xml:ns:yang:ietf-datastores\">");
         if (!rpc.contains(NetconfConstants.XML_VERSION)) {
             rpc = NetconfConstants.XML_VERSION + rpc;
         }
@@ -278,11 +279,25 @@ public class NetconfSession {
         return lastRpcReply;
     }
 
-    public XML getRunningConfigAndState(String filter) throws IOException, SAXException {
+    public XML getRunningConfigAndState(String xpathFilter) throws IOException, SAXException {
         String rpc = "<rpc>" +
                 "<get>" +
-                (filter == null ? "" : filter) +
+                (xpathFilter == null ? "" : xpathFilter) +
                 "</get>" +
+                "</rpc>" +
+                NetconfConstants.DEVICE_PROMPT;
+        lastRpcReply = getRpcReply(rpc);
+        return convertToXML(lastRpcReply);
+    }
+
+    public XML getData(String xpathFilter, String datastore)
+            throws IOException, SAXException {
+
+        String rpc = "<rpc>" +
+                "<get-data>" +
+                "<datastore>ds:" + datastore + "</datastore>" +
+                (xpathFilter == null ? "" : xpathFilter) +
+                "</get-data>" +
                 "</rpc>" +
                 NetconfConstants.DEVICE_PROMPT;
         lastRpcReply = getRpcReply(rpc);

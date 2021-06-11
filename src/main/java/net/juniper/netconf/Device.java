@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A <code>Device</code> is used to define a Netconf server.
@@ -845,13 +846,47 @@ public class Device implements AutoCloseable {
         return this.netconfSession.getRunningConfig(configTree);
     }
 
-    public XML getRunningConfigAndState(String filter) throws IOException, SAXException {
+    /**
+     * Retrieve the running configuration, or part of the configuration.
+     *
+     * @param xpathFilter example <code><filter xmlns:model='urn:path:for:my:model' select='/model:*'></filter></code>
+     * @return configuration data as XML object.
+     * @throws java.io.IOException      If there are errors communicating with the netconf server.
+     * @throws org.xml.sax.SAXException If there are errors parsing the XML reply.
+     */
+    public XML getRunningConfigAndState(String xpathFilter) throws IOException, SAXException {
         if (netconfSession == null) {
             throw new IllegalStateException("Cannot execute RPC, you need to " +
                     "establish a connection first.");
         }
-        return this.netconfSession.getRunningConfigAndState(filter);
+        return this.netconfSession.getRunningConfigAndState(xpathFilter);
     }
+
+
+    /**
+     * Run the <get-data> call to netconf server and retrieve data as an XML.
+     *
+     * @param xpathFilter example <code><filter xmlns:model='urn:path:for:my:model' select='/model:*'></filter></code>
+     * @param datastore running, startup, candidate, or operational
+     * @return configuration data as XML object.
+     * @throws java.io.IOException      If there are errors communicating with the netconf server.
+     * @throws org.xml.sax.SAXException If there are errors parsing the XML reply.
+     */
+    public XML getData(String xpathFilter, @NonNull String datastore) throws IOException, SAXException {
+        if (netconfSession == null) {
+            throw new IllegalStateException("Cannot execute RPC, you need to " +
+                    "establish a connection first.");
+        }
+        if (datastore != null) switch (datastore.trim().toLowerCase(Locale.ROOT)) {
+            case "running":
+            case "startup":
+            case "candidate":
+            case "operational":
+                return this.netconfSession.getData(xpathFilter, datastore.trim().toLowerCase(Locale.ROOT));
+        }
+        throw new IllegalStateException("Unable to process datastore: " + datastore);
+    }
+
 
     /**
      * Retrieve the whole candidate configuration.
